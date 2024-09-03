@@ -1,0 +1,9 @@
+# image.yaml
+python_version: 3.10.6
+base_image: ubuntu:focal
+packages:
+  - transformers==4.44.2
+  - datasets==2.21.0
+registry: localhost:30000
+env:
+  Debug: "True"
