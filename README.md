@@ -24,7 +24,7 @@
 
 <html>
     <h2 id="quick-start">
-        🚀 Quick Start
+        🚀 Quick Start 🚀
     </h2>
 </html>
 
