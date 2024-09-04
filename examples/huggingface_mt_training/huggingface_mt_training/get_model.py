@@ -1,16 +1,15 @@
 import flytekit
-from flytekit import ImageSpec, Resources, task, workflow
+from flytekit import Resources, task, workflow
 from flytekit.types.directory import FlyteDirectory
 
-# AutoModelForSeq2SeqLM requires torch to be installed
-custom_image = ImageSpec(
-    packages=["transformers", "torch"],
-    registry="localhost:30000",
-)
+try:
+    from .image_specs import transformers_image_spec
+except ImportError:
+    from image_specs import transformers_image_spec
 
 
 # Increase the RAM required for the task, the model is loaded in memory
-@task(container_image=custom_image, limits=Resources(mem="5G"), requests=Resources(mem="4.5G"))
+@task(container_image=transformers_image_spec, limits=Resources(mem="5G"), requests=Resources(mem="4.5G"))
 def get_model(pretrained_model_name: str) -> FlyteDirectory:
     """
     Downloads the model from the Hugging Face model hub and saves it to a directory.
@@ -30,7 +29,7 @@ def get_model(pretrained_model_name: str) -> FlyteDirectory:
 
 
 # Increase the RAM required for the task, the model is loaded in memory
-@task(container_image=custom_image)
+@task(container_image=transformers_image_spec)
 def get_tokenizer(pretrained_model_name: str) -> FlyteDirectory:
     """
     Downloads the tokenizer of the model from the Hugging Face model hub and saves it to a directory.

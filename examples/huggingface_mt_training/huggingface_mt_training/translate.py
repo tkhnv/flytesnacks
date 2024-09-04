@@ -1,4 +1,4 @@
-from flytekit import task
+from flytekit import Resources, task
 from flytekit.types.directory import FlyteDirectory
 
 try:
@@ -6,9 +6,14 @@ try:
 except ImportError:
     from custom_types import DatasetWithMetadata
 
+try:
+    from .image_specs import transformers_image_spec
+except ImportError:
+    from image_specs import transformers_image_spec
+
 
 # create a flyte task to translate a tokenized dataset with M2M100 model
-@task
+@task(container_image=transformers_image_spec, limits=Resources(mem="5G"), requests=Resources(mem="4.5G"))
 def translate(
     dataset: DatasetWithMetadata,
     model: FlyteDirectory,
