@@ -1,7 +1,9 @@
 from datasets import Dataset
+from dataclasses import dataclass
 
 
-from typing import NamedTuple
-
-
-DatasetWithMetadata = NamedTuple("DatasetWithMetadata", dataset=Dataset, source_language=str, target_language=str)
+@dataclass
+class DatasetWithMetadata:
+    dataset: Dataset
+    source_language: str
+    target_language: str
