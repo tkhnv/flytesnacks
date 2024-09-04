@@ -1,4 +1,4 @@
-from typing import Callable, NamedTuple
+from typing import Callable
 
 from flytekit import task, workflow, Resources
 from datasets import load_dataset, Dataset
@@ -15,15 +15,13 @@ MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
 HF_TOKEN = None  # use it if you want to fetch a private dataset
 
-dataset_with_metadata = NamedTuple(Dataset, (str, str))
-
 
 @task
 def download_dataset(
     dataset_path: str,
     config_name: str,
     **load_dataset_kwargs,
-) -> dataset_with_metadata:
+) -> tuple[Dataset, tuple[str, str]]:
     # load the dataset and convert it to unified format
     # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
     dataset = load_dataset(dataset_path, config_name, split="test", **load_dataset_kwargs)
