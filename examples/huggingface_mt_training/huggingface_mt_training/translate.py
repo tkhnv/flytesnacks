@@ -1,6 +1,5 @@
 from flytekit import task
-
-from transformers import M2M100ForConditionalGeneration
+from flytekit.types.directory import FlyteDirectory
 
 try:
     from .types import DatasetWithMetadata
@@ -12,7 +11,7 @@ except ImportError:
 @task
 def translate(
     dataset: DatasetWithMetadata,
-    model: M2M100ForConditionalGeneration,
+    model: FlyteDirectory,
     max_target_length: int = 256,
     batch_size: int = 8,
     beam_size: int = 4,
@@ -21,13 +20,16 @@ def translate(
     Translate a tokenized dataset using the M2M100 model.
     Args:
         dataset (DatasetWithMetadata): The tokenized dataset to translate.
-        model (M2M100ForConditionalGeneration): The model to use for translation.
-        max_target_length (int, optional): The maximum target length for the model. Defaults to 256.
+        model (FlyteDirectory): The directory containing the model.
+        max_target_length (int, optional): The maximum length of the target sequence. Defaults to 256.
         batch_size (int, optional): The batch size for translation. Defaults to 8.
+        beam_size (int, optional): The beam size for translation. Defaults
     Returns:
         Dataset: The translated dataset.
     """
-    # translate the dataset
+    from transformers import AutoModelForSeq2SeqLM
+
+    model = AutoModelForSeq2SeqLM.from_pretrained(model)
     translated_dataset = dataset.dataset.map(
         lambda e: model.generate(
             e["input_ids"],
