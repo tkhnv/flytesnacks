@@ -9,63 +9,24 @@ from transformers import (
     Seq2SeqTrainer,
     DataCollatorForSeq2Seq
 )
-from huggingface_hub import HfApi
 
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
 HF_TOKEN = None  # use it if you want to fetch a private dataset
 
-
 @task
 def download_dataset(
     dataset_path: str,
     config_name: str,
-    src_lang: str,
-    tgt_lang: str,
     **load_dataset_kwargs,
-) -> Dataset:
-    # TODO: consider if this really necessary, we can just load the dataset and use
-    # it as is
-    def get_features_keys() -> tuple:
-        # we expect the dataset to have a "translation" key with two languages
-        hf_api = HfApi(token=HF_TOKEN)
-        metadata = hf_api.dataset_info(dataset_path)
-        try:
-            configs = metadata.card_data.dataset_info
-        except AttributeError:
-            # if there is no metadata, assume that
-            # the data are in the correct format already
-            return src_lang, tgt_lang
-        assert len(configs) != 0
-
-        config = filter(lambda c: c["config_name"] == config_name, configs)
-        if len(config) == 0:
-            config = configs[0]
-        translation_feature_dtype = filter(
-            lambda f: f["name"] == "translation",
-            config["features"],
-        )[0]
-        languages = tuple(translation_feature_dtype.values())
-        assert len(languages) == 2
-
-        return languages
-
-    s, t = get_features_keys()
-
+) -> tuple[Dataset, tuple[str, str]]:
     # load the dataset and convert it to unified format
     # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
-    dataset = load_dataset(dataset_path, config_name, **load_dataset_kwargs)
+    dataset = load_dataset(dataset_path, config_name, split="test", **load_dataset_kwargs)
     # rename columns
-    dataset = dataset.map(
-        lambda example: {
-            "translation": {
-                src_lang: example["translation"][s],
-                tgt_lang: example["translation"][t],
-            }
-    }).select_columns([src_lang, tgt_lang])
-    return dataset
-
+    dataset = dataset.select_columns("translation")
+    return dataset, tuple(dataset.info.features["translation"].languages)
 
 @task
 def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, **map_kwargs):
@@ -106,7 +67,7 @@ def train(
 @workflow
 def adapt_model(pretrained_model_name_or_path: str, hyperparameters):
     # put all the tasks here
-    dataset = download_dataset("wmt14", "cs-en")
+    dataset, language_pair = download_dataset("wmt14", "cs-en")
     dataset = preprocess(dataset, lambda e: e, {})
 
 
