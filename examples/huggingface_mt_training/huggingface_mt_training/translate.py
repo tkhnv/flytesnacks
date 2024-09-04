@@ -1,5 +1,6 @@
 from flytekit import Resources, task
 from flytekit.types.directory import FlyteDirectory
+from flytekit.types.structured.structured_dataset import StructuredDataset
 
 try:
     from .custom_types import DatasetWithMetadata
@@ -20,7 +21,7 @@ def translate(
     max_target_length: int = 256,
     batch_size: int = 8,
     beam_size: int = 4,
-):
+) -> DatasetWithMetadata:
     """
     Translate a tokenized dataset using the M2M100 model.
     Args:
@@ -32,11 +33,15 @@ def translate(
     Returns:
         Dataset: The translated dataset.
     """
+    import pandas as pd
     from transformers import AutoModelForSeq2SeqLM
+    from datasets import Dataset
 
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
-    translated_dataset = dataset.dataset.map(
+    hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
+
+    translated_dataset = hf_dataset.map(
         lambda e: model.generate(
             e["input_ids"],
             max_length=max_target_length,
@@ -47,4 +52,4 @@ def translate(
         batch_size=batch_size,
     )
 
-    return translated_dataset
+    return StructuredDataset(dataframe=translated_dataset.to_pandas())
