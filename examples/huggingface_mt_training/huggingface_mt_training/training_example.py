@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, NamedTuple
 
 from flytekit import task, workflow, Resources
 from datasets import load_dataset, Dataset
@@ -7,7 +7,7 @@ from transformers import (
     M2M100Tokenizer,
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
-    DataCollatorForSeq2Seq
+    DataCollatorForSeq2Seq,
 )
 
 
@@ -15,12 +15,15 @@ MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
 HF_TOKEN = None  # use it if you want to fetch a private dataset
 
+dataset_with_metadata = NamedTuple(Dataset, (str, str))
+
+
 @task
 def download_dataset(
     dataset_path: str,
     config_name: str,
     **load_dataset_kwargs,
-) -> tuple[Dataset, tuple[str, str]]:
+) -> dataset_with_metadata:
     # load the dataset and convert it to unified format
     # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
     dataset = load_dataset(dataset_path, config_name, split="test", **load_dataset_kwargs)
@@ -28,10 +31,12 @@ def download_dataset(
     dataset = dataset.select_columns("translation")
     return dataset, tuple(dataset.info.features["translation"].languages)
 
+
 @task
 def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, **map_kwargs):
     tokenized_dataset = dataset.map(preprocess_fun, batched=True, **map_kwargs)
     return tokenized_dataset
+
 
 # TODO: IMPLEMENT ME
 @task
@@ -64,10 +69,9 @@ def train(
     trainer.train()
     trainer.save_model()
 
+
 @workflow
 def adapt_model(pretrained_model_name_or_path: str, hyperparameters):
     # put all the tasks here
     dataset, language_pair = download_dataset("wmt14", "cs-en")
     dataset = preprocess(dataset, lambda e: e, {})
-
-
