@@ -15,6 +15,7 @@ def translate(
     model: M2M100ForConditionalGeneration,
     max_target_length: int = 256,
     batch_size: int = 8,
+    beam_size: int = 4,
 ):
     """
     Translate a tokenized dataset using the M2M100 model.
@@ -31,8 +32,7 @@ def translate(
         lambda e: model.generate(
             e["input_ids"],
             max_length=max_target_length,
-            num_beams=4,
-            early_stopping=True,
+            num_beams=beam_size,
             decoder_start_token_id=model.config.pad_token_id,
         ),
         batched=True,
