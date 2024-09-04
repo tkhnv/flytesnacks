@@ -9,44 +9,77 @@ from transformers import (
     Seq2SeqTrainer,
     DataCollatorForSeq2Seq
 )
+from huggingface_hub import HfApi
 
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
+HF_TOKEN = None  # use it if you want to fetch a private dataset
 
 
 @task
-def download_dataset(path: str) -> Dataset:
-    dataset = load_dataset(path)
-
-    return dataset
-
-@task
-def preprocess(
-    dataset: Dataset,
-    pretrained_model_name_or_path: str,
+def download_dataset(
+    dataset_path: str,
+    config_name: str,
     src_lang: str,
     tgt_lang: str,
-    preprocess_fun: Callable
-):
-    tokenizer = M2M100Tokenizer.from_pretrained(
-        pretrained_model_name_or_path,
-        src_lang=src_lang,
-        tgt_lang=tgt_lang,
-    )
-    tokenized_dataset = dataset.map(preprocess_fun, batched=True)
-    return tokenized_dataset
+    **load_dataset_kwargs,
+) -> Dataset:
+    # TODO: consider if this really necessary, we can just load the dataset and use
+    # it as is
+    def get_features_keys() -> tuple:
+        # we expect the dataset to have a "translation" key with two languages
+        hf_api = HfApi(token=HF_TOKEN)
+        metadata = hf_api.dataset_info(dataset_path)
+        try:
+            configs = metadata.card_data.dataset_info
+        except AttributeError:
+            # if there is no metadata, assume that
+            # the data are in the correct format already
+            return src_lang, tgt_lang
+        assert len(configs) != 0
+
+        config = filter(lambda c: c["config_name"] == config_name, configs)
+        if len(config) == 0:
+            config = configs[0]
+        translation_feature_dtype = filter(
+            lambda f: f["name"] == "translation",
+            config["features"],
+        )[0]
+        languages = tuple(translation_feature_dtype.values())
+        assert len(languages) == 2
+
+        return languages
+
+    s, t = get_features_keys()
+
+    # load the dataset and convert it to unified format
+    # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
+    dataset = load_dataset(dataset_path, config_name, **load_dataset_kwargs)
+    # rename columns
+    dataset = dataset.map(
+        lambda example: {
+            "translation": {
+                src_lang: example["translation"][s],
+                tgt_lang: example["translation"][t],
+            }
+    }).select_columns([src_lang, tgt_lang])
+    return dataset
 
 
 @task
-def get_model():
-    pass
+def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, **map_kwargs):
+    tokenized_dataset = dataset.map(preprocess_fun, batched=True, **map_kwargs)
+    return tokenized_dataset
 
-@task(limits=Resources())  # TODO: change to gpu in production
+# TODO: IMPLEMENT ME
+@task
 def train(
     src_lang: str,
     tgt_lang: str,
-    tokenized_dataset: Dataset,
+    dataset: Dataset,
+    model,
+    tokenizer,
     training_args: Seq2SeqTrainingArguments = Seq2SeqTrainingArguments(
         output_dir="./results",
         evaluation_strategy="epoch",
@@ -58,19 +91,12 @@ def train(
         predict_with_generate=True,
         fp16=True,
     ),
-    pretrained_model_name_or_path: str="facebook/m2m100_418M",
 ):
-    model = M2M100ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
-    tokenizer = M2M100Tokenizer.from_pretrained(
-        pretrained_model_name_or_path,
-        src_lang=src_lang,
-        tgt_lang=tgt_lang,
-    )
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["validation"],
+        train_dataset=dataset["train"],
+        eval_dataset=dataset["validation"],
         tokenizer=tokenizer,
         data_collator=DataCollatorForSeq2Seq(tokenizer, model=model),
     )
@@ -80,4 +106,7 @@ def train(
 @workflow
 def adapt_model(pretrained_model_name_or_path: str, hyperparameters):
     # put all the tasks here
-    pass
+    dataset = download_dataset("wmt14", "cs-en")
+    dataset = preprocess(dataset, lambda e: e, {})
+
+
