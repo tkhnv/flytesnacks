@@ -27,7 +27,7 @@ def download_dataset(
 @workflow
 def wf() -> DatasetWithMetadata:
     # put all the tasks here
-    dataset = download_dataset("wmt14", "cs-en", {})
+    dataset = download_dataset("wmt14", "cs-en")
     # dataset = preprocess(dataset, lambda e: e, {})
     return dataset
 
