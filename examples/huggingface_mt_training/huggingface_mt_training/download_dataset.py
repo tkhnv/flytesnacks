@@ -1,5 +1,6 @@
 from datasets import load_dataset
 from flytekit import task, workflow
+from flytekit.types.structured.structured_dataset import StructuredDataset
 
 try:
     from .custom_types import DatasetWithMetadata
@@ -26,7 +27,7 @@ def download_dataset(
         .rename_column(f"translation.{languages[0]}", "source")
         .rename_column(f"translation.{languages[1]}", "target")
     )
-    return DatasetWithMetadata(dataset, *languages)
+    return DatasetWithMetadata(StructuredDataset(dataframe=dataset), *languages)
 
 
 @workflow
