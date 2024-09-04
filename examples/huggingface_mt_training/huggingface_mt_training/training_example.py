@@ -17,7 +17,7 @@ HF_TOKEN = None  # use it if you want to fetch a private dataset
 
 
 @task
-def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, **map_kwargs):
+def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, map_kwargs: dict = {}):
     tokenized_dataset = dataset.map(preprocess_fun, batched=True, **map_kwargs)
     return tokenized_dataset
 
