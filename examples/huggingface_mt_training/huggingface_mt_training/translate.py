@@ -2,9 +2,9 @@ from flytekit import task
 from flytekit.types.directory import FlyteDirectory
 
 try:
-    from .types import DatasetWithMetadata
+    from .custom_types import DatasetWithMetadata
 except ImportError:
-    from types import DatasetWithMetadata
+    from custom_types import DatasetWithMetadata
 
 
 # create a flyte task to translate a tokenized dataset with M2M100 model

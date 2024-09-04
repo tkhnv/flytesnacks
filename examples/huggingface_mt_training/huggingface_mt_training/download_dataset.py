@@ -2,9 +2,9 @@ from datasets import load_dataset
 from flytekit import task, workflow
 
 try:
-    from .types import DatasetWithMetadata
+    from .custom_types import DatasetWithMetadata
 except ImportError:
-    from types import DatasetWithMetadata
+    from custom_types import DatasetWithMetadata
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
@@ -19,9 +19,14 @@ def download_dataset(
     # load the dataset and convert it to unified format
     # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
     dataset = load_dataset(dataset_path, config_name, split="test")
-    # rename columns
-    dataset = dataset.select_columns("translation")
-    return DatasetWithMetadata(dataset, *dataset.info.features["translation"].languages)
+    languages = dataset.info.features["translation"].languages
+    # Rename columns to source and target
+    dataset = (
+        dataset.flatten()
+        .rename_column(f"translation.{languages[0]}", "source")
+        .rename_column(f"translation.{languages[1]}", "target")
+    )
+    return DatasetWithMetadata(dataset, *languages)
 
 
 @workflow
