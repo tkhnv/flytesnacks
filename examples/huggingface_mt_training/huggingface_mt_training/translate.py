@@ -1,7 +1,11 @@
 from flytekit import task
 
 from transformers import M2M100ForConditionalGeneration
-from .types import DatasetWithMetadata
+
+try:
+    from .types import DatasetWithMetadata
+except ImportError:
+    from types import DatasetWithMetadata
 
 
 # create a flyte task to translate a tokenized dataset with M2M100 model

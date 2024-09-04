@@ -1,7 +1,10 @@
 from datasets import load_dataset
 from flytekit import task, workflow
 
-from examples.huggingface_mt_training.huggingface_mt_training.types import DatasetWithMetadata
+try:
+    from .types import DatasetWithMetadata
+except ImportError:
+    from types import DatasetWithMetadata
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
