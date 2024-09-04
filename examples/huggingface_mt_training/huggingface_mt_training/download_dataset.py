@@ -1,20 +1,17 @@
-from typing import NamedTuple
-
-from datasets import Dataset, load_dataset
+from datasets import load_dataset
 from flytekit import task, workflow
+
+from examples.huggingface_mt_training.huggingface_mt_training.types import DatasetWithMetadata
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
 HF_TOKEN = None  # use it if you want to fetch a private dataset
-
-DatasetWithMetadata = NamedTuple("DatasetWithMetadata", dataset=Dataset, source_language=str, target_language=str)
 
 
 @task
 def download_dataset(
     dataset_path: str,
     config_name: str,
-    load_dataset_kwargs: dict = {},
 ) -> DatasetWithMetadata:
     # load the dataset and convert it to unified format
     # of {"translation": {`src_lang`: str, `tgt_lang`: str}}

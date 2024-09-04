@@ -17,20 +17,6 @@ HF_TOKEN = None  # use it if you want to fetch a private dataset
 
 
 @task
-def download_dataset(
-    dataset_path: str,
-    config_name: str,
-    **load_dataset_kwargs,
-) -> tuple[Dataset, tuple[str, str]]:
-    # load the dataset and convert it to unified format
-    # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
-    dataset = load_dataset(dataset_path, config_name, split="test", **load_dataset_kwargs)
-    # rename columns
-    dataset = dataset.select_columns("translation")
-    return dataset, tuple(dataset.info.features["translation"].languages)
-
-
-@task
 def preprocess(dataset: Dataset, preprocess_fun: Callable = lambda e: e, **map_kwargs):
     tokenized_dataset = dataset.map(preprocess_fun, batched=True, **map_kwargs)
     return tokenized_dataset
