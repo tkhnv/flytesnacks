@@ -1,24 +1,25 @@
-import flytekit
-from flytekit import ImageSpec, Resources, task, workflow
-from flytekit.types.directory import FlyteDirectory
+from flytekit import ImageSpec, Resources, workflow
+import pandas as pd
+from datasets import Dataset
 
 try:
-    from .custom_types import DatasetWithMetadata
-except ImportError:
     from custom_types import DatasetWithMetadata
-try:
-    from tokenize import tokenize
-
     from download_dataset import download_dataset
     from filter_length_ratio import filter_length_ratio
     from get_model import get_model, get_tokenizer
+    from tokenize import tokenize
     from translate import translate
+    from detokenize import detokenize
+    from evaluate import evaluate
 except ImportError:
+    from .custom_types import DatasetWithMetadata
     from .download_dataset import download_dataset
     from .filter_length_ratio import filter_length_ratio
     from .get_model import get_model, get_tokenizer
     from .tokenize import tokenize
     from .translate import translate
+    from .detokenize import detokenize
+    from .evaluate import evaluate
 
 
 @workflow
@@ -31,6 +32,23 @@ def wf() -> DatasetWithMetadata:
     filtered_dataset = filter_length_ratio(dataset)
     tokenized_dataset = tokenize(filtered_dataset, tokenizer)
     translated_dataset = translate(tokenized_dataset, model)
+    translated_dataset = detokenize(translated_dataset, tokenizer)
+    # add detokenized translation column to the original dataset
+    # TODO: maybe we should do this some other way
+    original_hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
+    translated_hf_dataset = detokenize(translated_dataset, tokenizer)
+    original_hf_dataset = original_hf_dataset.add_column(
+        "detokenized", translated_hf_dataset["detokenized"]
+    )
+    score = evaluate(
+        DatasetWithMetadata(
+            original_hf_dataset,
+            source_language=dataset.source_language,
+            target_language=dataset.source_language
+        ),
+        "bleu",
+
+    )
     return translated_dataset
 
 

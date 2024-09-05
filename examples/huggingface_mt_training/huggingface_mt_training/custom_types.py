@@ -11,4 +11,8 @@ class DatasetWithMetadata(DataClassJSONMixin):
     source_language: str
     target_language: str
 
+@dataclass
+class EvaluateReturnType:
+    score: float
+
 Metric = Literal["bleu", "chrf"]
