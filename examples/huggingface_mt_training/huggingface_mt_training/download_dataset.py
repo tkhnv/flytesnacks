@@ -10,9 +10,6 @@ try:
 except ImportError:
     from custom_types import DatasetWithMetadata
 
-MAX_INPUT_LENGTH = 256
-MAX_TARGET_LENGTH = 256
-HF_TOKEN = None  # use it if you want to fetch a private dataset
 
 @task(container_image=transformers_image_spec)
 def download_dataset(
