@@ -113,7 +113,7 @@ def filter_length_ratio(
 @workflow
 def wf() -> DatasetWithMetadata:
     """Declare workflow called `wf`."""
-    dataset = download_dataset("wmt14", "cs-en")
+    dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
     filtered_dataset = filter_length_ratio(dataset)
     return filtered_dataset
 

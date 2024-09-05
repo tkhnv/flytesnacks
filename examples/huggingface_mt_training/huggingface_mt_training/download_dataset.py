@@ -15,10 +15,11 @@ except ImportError:
 def download_dataset(
     dataset_path: str,
     config_name: str,
+    **load_dataset_kwargs,
 ) -> DatasetWithMetadata:
     from datasets import load_dataset
 
-    dataset = load_dataset(dataset_path, config_name, split="test")
+    dataset = load_dataset(dataset_path, config_name, **load_dataset_kwargs)
     languages = dataset.info.features["translation"].languages
     # Rename columns to source and target
     dataset = (
@@ -32,7 +33,7 @@ def download_dataset(
 @workflow
 def wf() -> DatasetWithMetadata:
     # put all the tasks here
-    dataset = download_dataset("wmt14", "cs-en")
+    dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
     # dataset = preprocess(dataset, lambda e: e, {})
     return dataset
 

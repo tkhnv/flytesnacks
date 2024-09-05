@@ -30,7 +30,7 @@ def train_model(
 
 @workflow
 def wf() -> FlyteDirectory:
-    dataset_and_languages = download_dataset("wmt14", "cs-en")
+    dataset_and_languages = download_dataset("wmt14", "cs-en", {"split": "test"})
     base_model = get_model("facebook/m2m100_418M")
     trained_model = train_model(base_model, dataset_and_languages)
     return trained_model
