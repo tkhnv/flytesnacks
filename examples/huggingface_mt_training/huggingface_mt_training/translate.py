@@ -18,9 +18,14 @@ except ImportError:
     from download_dataset import download_dataset
 
 try:
-    from .get_model import get_model
+    from .get_model import get_model, get_tokenizer
 except ImportError:
-    from get_model import get_model
+    from get_model import get_model, get_tokenizer
+
+try:
+    from .tokenize import tokenize
+except ImportError:
+    from tokenize import tokenize
 
 
 # translate a tokenized dataset with M2M100 model
@@ -51,8 +56,9 @@ def translate(
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
     hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
+    input_data = input_data.set_format(type="torch", columns=["input_ids"])
 
-    translated_dataset = hf_dataset.map(
+    translated_dataset = input_data.map(
         lambda e: model.generate(
             e["input_ids"],
             max_length=max_target_length,
@@ -70,6 +76,9 @@ def translate(
 def wf() -> DatasetWithMetadata:
     """Declare workflow called `wf`."""
     dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
+    tokenizer = get_tokenizer("facebook/m2m100_418M")
+    dataset = tokenize(dataset, tokenizer)
+
     model = get_model("facebook/m2m100_418M")
     translated = translate(dataset, model)
     return translated
