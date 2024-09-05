@@ -24,6 +24,7 @@ def download_dataset(
     # Rename columns to source and target
     dataset = (
         dataset.flatten()
+        .take(5)
         .rename_column(f"translation.{languages[0]}", "source")
         .rename_column(f"translation.{languages[1]}", "target")
     )
