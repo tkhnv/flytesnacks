@@ -1,33 +1,37 @@
-from typing import NamedTuple
-
-from datasets import Dataset, load_dataset
-from flytekit import task, workflow, ImageSpec
+from flytekit.types.structured.structured_dataset import StructuredDataset
+from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
+try:
+    from .image_specs import transformers_image_spec
+except ImportError:
+    from image_specs import transformers_image_spec
+try:
+    from .download_dataset import download_dataset
+except ImportError:
+    from download_dataset import download_dataset
+try:
+    from .get_model import get_model
+except ImportError:
+    from get_model import get_model
+try:
+    from .custom_types import DatasetWithMetadata
+except ImportError:
+    from custom_types import DatasetWithMetadata
 
-custom_image = ImageSpec(
-    packages=["transformers", "torch", "datasets"],
-    registry="localhost:30000",
-    base_image="ubuntu:focal"
-)
 
-
-DatasetWithMetadata = NamedTuple("DatasetWithMetadata", dataset=Dataset, source_language=str, target_language=str)
-
-@task(container_image=custom_image)
+@task(container_image=transformers_image_spec)
 def train_model(
     base_model: FlyteDirectory,
-    tokenized_dataset: Dataset,
+    tokenized_dataset: DatasetWithMetadata,
 ) -> FlyteDirectory:
     return base_model
 
 
 @workflow
 def wf() -> FlyteDirectory:
-    from .download_dataset import download_dataset
     dataset_and_languages = download_dataset("wmt14", "cs-en")
-    from .get_model import  get_model
     base_model = get_model("facebook/m2m100_418M")
-    trained_model = train_model(base_model, dataset_and_languages.dataset)
+    trained_model = train_model(base_model, dataset_and_languages)
     return trained_model
 
 

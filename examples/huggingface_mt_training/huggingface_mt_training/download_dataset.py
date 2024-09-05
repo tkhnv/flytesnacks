@@ -1,7 +1,10 @@
 from datasets import load_dataset
 from flytekit import task, workflow
 from flytekit.types.structured.structured_dataset import StructuredDataset
-
+try:
+    from .image_specs import transformers_image_spec
+except ImportError:
+    from image_specs import transformers_image_spec
 try:
     from .custom_types import DatasetWithMetadata
 except ImportError:
@@ -11,8 +14,7 @@ MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
 HF_TOKEN = None  # use it if you want to fetch a private dataset
 
-
-@task
+@task(container_image=transformers_image_spec)
 def download_dataset(
     dataset_path: str,
     config_name: str,
