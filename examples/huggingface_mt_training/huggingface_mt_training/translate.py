@@ -56,7 +56,7 @@ def translate(
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
     hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
-    input_data = input_data.set_format(type="torch", columns=["input_ids"])
+    input_data = hf_dataset.set_format(type="torch", columns=["input_ids"])
 
     translated_dataset = input_data.map(
         lambda e: model.generate(
