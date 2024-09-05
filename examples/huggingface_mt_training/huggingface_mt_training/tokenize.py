@@ -7,19 +7,13 @@ import pandas as pd
 
 try:
     from .image_specs import transformers_image_spec
-except ImportError:
-    from image_specs import transformers_image_spec
-try:
     from .custom_types import DatasetWithMetadata
-except ImportError:
-    from custom_types import DatasetWithMetadata
-try:
     from .download_dataset import download_dataset
-except ImportError:
-    from download_dataset import download_dataset
-try:
     from .get_model import get_tokenizer
 except ImportError:
+    from image_specs import transformers_image_spec
+    from custom_types import DatasetWithMetadata
+    from download_dataset import download_dataset
     from get_model import get_tokenizer
 
 MAX_INPUT_LENGTH = 256
