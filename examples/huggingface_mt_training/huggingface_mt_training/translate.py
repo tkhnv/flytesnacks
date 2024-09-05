@@ -61,7 +61,9 @@ def translate(
 
     translated_dataset = []
 
-    for batch in DataLoader(hf_dataset, batch_size=batch_size):
+    # TODO fix batching - we need to pad somehow
+    # for batch in DataLoader(hf_dataset, batch_size=batch_size):
+    for batch in DataLoader(hf_dataset, batch_size=1):
         translated = model.generate(
             batch["input_ids"],
             max_length=max_target_length,
