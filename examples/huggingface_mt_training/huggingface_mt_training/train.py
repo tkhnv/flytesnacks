@@ -8,23 +8,15 @@ from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 
 try:
     from .image_specs import transformers_image_spec
-except ImportError:
-    from image_specs import transformers_image_spec
-try:
     from .download_dataset import download_dataset
-except ImportError:
-    from download_dataset import download_dataset
-try:
     from .tokenize import tokenize
-except ImportError:
-    from tokenize import tokenize
-try:
     from .get_model import get_model, get_tokenizer
-except ImportError:
-    from get_model import get_model, get_tokenizer
-try:
     from .custom_types import DatasetWithMetadata
 except ImportError:
+    from image_specs import transformers_image_spec
+    from download_dataset import download_dataset
+    from tokenize import tokenize
+    from get_model import get_model, get_tokenizer
     from custom_types import DatasetWithMetadata
 
 
