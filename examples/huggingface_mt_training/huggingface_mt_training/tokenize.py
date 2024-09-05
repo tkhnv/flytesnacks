@@ -40,7 +40,7 @@ def tokenize(
         ),
         batched=True,
     )
-    hf_dataset = hf_dataset.map(
+    labels = hf_dataset.map(
         lambda batch: tokenizer(
             text_target=batch["target"],
             max_length=MAX_TARGET_LENGTH,
@@ -49,6 +49,7 @@ def tokenize(
         ),
         batched=True,
     )
+    hf_dataset = hf_dataset.add_column("labels", labels["input_ids"])
 
     return DatasetWithMetadata(
         StructuredDataset(dataframe=hf_dataset),
