@@ -51,6 +51,7 @@ def translate(
     import pandas as pd
     from datasets import Dataset
     from transformers import AutoModelForSeq2SeqLM
+    from torch.utils.data import DataLoader
 
     model_path.download()
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
@@ -58,18 +59,21 @@ def translate(
     hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
     hf_dataset.set_format(type="torch", columns=["input_ids"], output_all_columns=True)
 
-    translated_dataset = hf_dataset.map(
-        lambda e: model.generate(
-            e["input_ids"],
+    translated_dataset = []
+
+    for batch in DataLoader(hf_dataset, batch_size=batch_size):
+        translated = model.generate(
+            batch["input_ids"],
             max_length=max_target_length,
             num_beams=beam_size,
             decoder_start_token_id=model.config.pad_token_id,
-        ),
-        batched=True,
-        batch_size=batch_size,
-    )
+        )
 
-    return StructuredDataset(dataframe=translated_dataset.to_pandas())
+        batch["translated"] = translated
+        translated_dataset.extend(batch)
+
+    translated_hf = Dataset.from_list(translated_dataset)
+    return StructuredDataset(dataframe=translated_hf.to_pandas())
 
 
 @workflow
