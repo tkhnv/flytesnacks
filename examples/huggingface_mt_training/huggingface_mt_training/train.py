@@ -1,9 +1,9 @@
 import flytekit
-from datasets import Dataset
 import pandas as pd
+from datasets import Dataset
 from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
-from transformers import DataCollatorForSeq2Seq, AutoTokenizer
+from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 
 try:
     from .image_specs import transformers_image_spec
@@ -33,7 +33,10 @@ def train_model(
     tokenizer: FlyteDirectory,
     tokenized_dataset: DatasetWithMetadata,
 ) -> FlyteDirectory:
-    from transformers import TrainingArguments, Trainer, AutoModelForSeq2SeqLM
+    from transformers import AutoModelForSeq2SeqLM, Trainer, TrainingArguments
+
+    base_model.download()
+    tokenizer.download()
     hf_dataset = Dataset.from_pandas(tokenized_dataset.dataset.open(pd.DataFrame).all())
     tokenizer = AutoTokenizer.from_pretrained(tokenizer.path)
 
@@ -70,7 +73,7 @@ def train_model(
 def wf() -> FlyteDirectory:
     model_name = "facebook/m2m100_418M"
     tokenizer = get_tokenizer(model_name)
-    tokenized_dataset = tokenize(download_dataset("wmt14", "cs-en"), tokenizer)
+    tokenized_dataset = tokenize(download_dataset("wmt14", "cs-en", {"split": "test"}), tokenizer)
     base_model = get_model(model_name)
     trained_model = train_model(base_model, tokenizer, tokenized_dataset)
     return trained_model

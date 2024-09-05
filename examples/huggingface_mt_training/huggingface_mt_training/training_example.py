@@ -1,15 +1,14 @@
 from typing import Callable
 
-from flytekit import task, workflow, Resources
-from datasets import load_dataset, Dataset
+from datasets import Dataset, load_dataset
+from flytekit import Resources, task, workflow
 from transformers import (
+    DataCollatorForSeq2Seq,
     M2M100ForConditionalGeneration,
     M2M100Tokenizer,
-    Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
-    DataCollatorForSeq2Seq,
+    Seq2SeqTrainingArguments,
 )
-
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
@@ -57,5 +56,5 @@ def train(
 @workflow
 def adapt_model(pretrained_model_name_or_path: str, hyperparameters):
     # put all the tasks here
-    dataset, language_pair = download_dataset("wmt14", "cs-en")
+    dataset, language_pair = download_dataset("wmt14", "cs-en", {"split": "test"})
     dataset = preprocess(dataset, lambda e: e, {})

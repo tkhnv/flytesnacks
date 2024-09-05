@@ -34,9 +34,10 @@ def translate(
         Dataset: The translated dataset.
     """
     import pandas as pd
-    from transformers import AutoModelForSeq2SeqLM
     from datasets import Dataset
+    from transformers import AutoModelForSeq2SeqLM
 
+    model_path.download()
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
     hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
