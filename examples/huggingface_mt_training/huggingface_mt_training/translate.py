@@ -63,7 +63,9 @@ def translate(
         translated_dataset.append(batch)
 
     translated_hf = Dataset.from_list(translated_dataset)
-    return StructuredDataset(dataframe=translated_hf.to_pandas())
+    return DatasetWithMetadata(
+        StructuredDataset(dataframe=translated_hf.to_pandas()), dataset.source_language, dataset.target_language
+    )
 
 
 @workflow
