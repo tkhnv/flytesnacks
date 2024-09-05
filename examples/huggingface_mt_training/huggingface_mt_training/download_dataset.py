@@ -1,6 +1,6 @@
-from datasets import load_dataset
 from flytekit import task, workflow
 from flytekit.types.structured.structured_dataset import StructuredDataset
+
 try:
     from .image_specs import transformers_image_spec
 except ImportError:
@@ -16,8 +16,8 @@ def download_dataset(
     dataset_path: str,
     config_name: str,
 ) -> DatasetWithMetadata:
-    # load the dataset and convert it to unified format
-    # of {"translation": {`src_lang`: str, `tgt_lang`: str}}
+    from datasets import load_dataset
+
     dataset = load_dataset(dataset_path, config_name, split="test")
     languages = dataset.info.features["translation"].languages
     # Rename columns to source and target
