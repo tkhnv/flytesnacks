@@ -1,20 +1,20 @@
-import pandas as pd
-from datasets import Dataset
 from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.structured.structured_dataset import StructuredDataset
 from transformers import AutoTokenizer
+from datasets import Dataset
+import pandas as pd
 
 try:
+    from .image_specs import transformers_image_spec
     from .custom_types import DatasetWithMetadata
     from .download_dataset import download_dataset
     from .get_model import get_tokenizer
-    from .image_specs import transformers_image_spec
 except ImportError:
+    from image_specs import transformers_image_spec
     from custom_types import DatasetWithMetadata
     from download_dataset import download_dataset
     from get_model import get_tokenizer
-    from image_specs import transformers_image_spec
 
 MAX_INPUT_LENGTH = 256
 MAX_TARGET_LENGTH = 256
@@ -26,7 +26,6 @@ def tokenize(
     dataset_and_languages: DatasetWithMetadata,
     tokenizer_path: FlyteDirectory,
 ) -> DatasetWithMetadata:
-    tokenizer_path.download()
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path.path)
     tokenizer.src_lang = dataset_and_languages.source_language
     tokenizer.tgt_lang = dataset_and_languages.target_language
