@@ -18,11 +18,7 @@ def detokenize(
     # we expect the dataset to have keys "labels" and "input_ids"
     hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
     hf_dataset = hf_dataset.map(
-        lambda batch: {"detokenized_labels": tokenizer.batch_decode(batch["labels"], skip_special_tokens=True)},
-        batched=True,
-    )
-    hf_dataset = hf_dataset.map(
-        lambda batch: {"detokenized_input_ids": tokenizer.batch_decode(batch["input_ids"], skip_special_tokens=True)},
+        lambda batch: {"detokenized": tokenizer.batch_decode(batch["sequences"], skip_special_tokens=True)},
         batched=True,
     )
     return DatasetWithMetadata(
