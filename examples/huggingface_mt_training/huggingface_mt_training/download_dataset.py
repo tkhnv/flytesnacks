@@ -22,7 +22,7 @@ def download_dataset(
     # Rename columns to source and target
     dataset = (
         dataset.flatten()
-        .take(5)
+        .take(5)  # TODO remove me for final version
         .rename_column(f"translation.{languages[0]}", "source")
         .rename_column(f"translation.{languages[1]}", "target")
     )

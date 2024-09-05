@@ -35,8 +35,7 @@ def detokenize(
     dataset = dataset_and_languages.dataset
     # we expect the dataset to have keys "labels" and "input_ids"
     hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
-
-    print(next(DataLoader(hf_dataset, batch_size=1)))
+    print(next(iter(DataLoader(hf_dataset, batch_size=1))))
 
     hf_dataset = hf_dataset.map(
         lambda batch: {"detokenized": tokenizer.batch_decode(batch["translated"], skip_special_tokens=True)},
