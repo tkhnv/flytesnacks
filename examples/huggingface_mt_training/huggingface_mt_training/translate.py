@@ -51,7 +51,6 @@ def translate(
 
     # TODO fix batching - we need to pad somehow
     # for batch in DataLoader(hf_dataset, batch_size=batch_size):
-    print("### TRANSLATING ###")
     for batch in DataLoader(hf_dataset, batch_size=1):
         print(batch)
         translated = model.generate(
@@ -61,16 +60,11 @@ def translate(
             decoder_start_token_id=model.config.pad_token_id,
         )
 
-        batch["translated"] = translated
-        translated_dataset.append(batch)
+        translated_dataset.append(translated)
 
-    print("### DONE TRANSLATING ###")
-    print("### TRANSLATED DATASET SAMPLE: ###")
-    translated_hf = Dataset.from_list(translated_dataset)
-    print(next(iter(DataLoader(translated_hf, batch_size=1))))
-
+    hf_dataset.add_column("translated", translated_dataset)
     return DatasetWithMetadata(
-        StructuredDataset(dataframe=translated_hf.to_pandas()), dataset.source_language, dataset.target_language
+        StructuredDataset(dataframe=hf_dataset.to_pandas()), dataset.source_language, dataset.target_language
     )
 
 
