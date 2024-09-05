@@ -51,7 +51,9 @@ def translate(
 
     # TODO fix batching - we need to pad somehow
     # for batch in DataLoader(hf_dataset, batch_size=batch_size):
+    print("### TRANSLATING ###")
     for batch in DataLoader(hf_dataset, batch_size=1):
+        print(batch)
         translated = model.generate(
             batch["input_ids"],
             max_length=max_target_length,
@@ -62,6 +64,8 @@ def translate(
         batch["translated"] = translated
         translated_dataset.append(batch)
 
+    print("### DONE TRANSLATING ###")
+    print("### TRANSLATED DATASET SAMPLE: ###")
     translated_hf = Dataset.from_list(translated_dataset)
     print(next(iter(DataLoader(translated_hf, batch_size=1))))
 
