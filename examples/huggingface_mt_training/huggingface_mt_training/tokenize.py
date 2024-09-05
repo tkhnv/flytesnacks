@@ -61,7 +61,7 @@ def tokenize(
 @workflow
 def wf() -> DatasetWithMetadata:
     # put all the tasks here
-    dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
+    dataset = download_dataset("wmt14", "cs-en", split="test")
     tokenizer = get_tokenizer("facebook/m2m100_418M")
     dataset = tokenize(dataset, tokenizer)
     return dataset
