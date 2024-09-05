@@ -24,6 +24,7 @@ def train_model(
     base_model: FlyteDirectory,
     tokenized_dataset: DatasetWithMetadata,
 ) -> FlyteDirectory:
+    print(tokenized_dataset)
     return base_model
 
 
