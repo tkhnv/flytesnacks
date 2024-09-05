@@ -1,4 +1,4 @@
-from flytekit import Resources, task
+from flytekit import Resources, task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.structured.structured_dataset import StructuredDataset
 
@@ -11,6 +11,16 @@ try:
     from .image_specs import transformers_image_spec
 except ImportError:
     from image_specs import transformers_image_spec
+
+try:
+    from .download_dataset import download_dataset
+except ImportError:
+    from download_dataset import download_dataset
+
+try:
+    from .get_model import get_model
+except ImportError:
+    from get_model import get_model
 
 
 # translate a tokenized dataset with M2M100 model
@@ -54,3 +64,12 @@ def translate(
     )
 
     return StructuredDataset(dataframe=translated_dataset.to_pandas())
+
+
+@workflow
+def wf() -> DatasetWithMetadata:
+    """Declare workflow called `wf`."""
+    dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
+    model = get_model("facebook/m2m100_418M")
+    translated = translate(dataset, model)
+    return translated
