@@ -60,7 +60,7 @@ def translate(
         )
 
         batch["translated"] = translated
-        translated_dataset.extend(batch)
+        translated_dataset.append(batch)
 
     translated_hf = Dataset.from_list(translated_dataset)
     return StructuredDataset(dataframe=translated_hf.to_pandas())
