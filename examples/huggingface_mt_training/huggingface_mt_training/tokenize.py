@@ -26,6 +26,7 @@ def tokenize(
     dataset_and_languages: DatasetWithMetadata,
     tokenizer_path: FlyteDirectory,
 ) -> DatasetWithMetadata:
+    tokenizer_path.download()
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path.path)
     tokenizer.src_lang = dataset_and_languages.source_language
     tokenizer.tgt_lang = dataset_and_languages.target_language
