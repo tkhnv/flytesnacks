@@ -1,9 +1,6 @@
 from flytekit import task, workflow
 from flytekit.types.directory import FlyteDirectory
 from flytekit.types.structured.structured_dataset import StructuredDataset
-from transformers import AutoTokenizer
-from datasets import Dataset
-import pandas as pd
 
 try:
     from .image_specs import transformers_image_spec
@@ -26,6 +23,10 @@ def tokenize(
     dataset_and_languages: DatasetWithMetadata,
     tokenizer_path: FlyteDirectory,
 ) -> DatasetWithMetadata:
+    from transformers import AutoTokenizer
+    from datasets import Dataset
+    import pandas as pd
+
     tokenizer_path.download()
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path.path)
     tokenizer.src_lang = dataset_and_languages.source_language

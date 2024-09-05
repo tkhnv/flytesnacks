@@ -1,5 +1,5 @@
-from flytekit import ImageSpec, Resources, workflow
 import pandas as pd
+from flytekit import workflow
 from datasets import Dataset
 
 try:
@@ -37,17 +37,12 @@ def wf() -> DatasetWithMetadata:
     # TODO: maybe we should do this some other way
     original_hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
     translated_hf_dataset = detokenize(translated_dataset, tokenizer)
-    original_hf_dataset = original_hf_dataset.add_column(
-        "detokenized", translated_hf_dataset["detokenized"]
-    )
+    original_hf_dataset = original_hf_dataset.add_column("detokenized", translated_hf_dataset["detokenized"])
     score = evaluate(
         DatasetWithMetadata(
-            original_hf_dataset,
-            source_language=dataset.source_language,
-            target_language=dataset.source_language
+            original_hf_dataset, source_language=dataset.source_language, target_language=dataset.source_language
         ),
         "bleu",
-
     )
     return translated_dataset
 

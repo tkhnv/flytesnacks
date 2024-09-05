@@ -3,11 +3,9 @@ from flytekit.types.structured.structured_dataset import StructuredDataset
 
 try:
     from .image_specs import transformers_image_spec
-except ImportError:
-    from image_specs import transformers_image_spec
-try:
     from .custom_types import DatasetWithMetadata
 except ImportError:
+    from image_specs import transformers_image_spec
     from custom_types import DatasetWithMetadata
 
 

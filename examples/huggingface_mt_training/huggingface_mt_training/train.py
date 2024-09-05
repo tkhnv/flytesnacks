@@ -1,10 +1,7 @@
 import flytekit
-import pandas as pd
-from datasets import Dataset
 from typing import Dict
 from flytekit import task, workflow, Resources
 from flytekit.types.directory import FlyteDirectory
-from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 
 try:
     from .image_specs import transformers_image_spec
@@ -27,7 +24,9 @@ def train_model(
     tokenized_dataset: DatasetWithMetadata,
     training_args: Dict[str, int],
 ) -> FlyteDirectory:
-    from transformers import AutoModelForSeq2SeqLM, Trainer, TrainingArguments
+    from transformers import AutoModelForSeq2SeqLM, Trainer, TrainingArguments, AutoTokenizer, DataCollatorForSeq2Seq
+    import pandas as pd
+    from datasets import Dataset
 
     base_model.download()
     tokenizer.download()

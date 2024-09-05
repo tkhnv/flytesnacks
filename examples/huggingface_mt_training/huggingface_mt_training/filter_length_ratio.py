@@ -4,14 +4,11 @@ from flytekit.types.structured.structured_dataset import StructuredDataset
 try:
     from .custom_types import DatasetWithMetadata
     from .image_specs import transformers_image_spec
+    from .download_dataset import download_dataset
 except ImportError:
     from custom_types import DatasetWithMetadata
     from image_specs import transformers_image_spec
-
-try:
     from download_dataset import download_dataset
-except ImportError:
-    from .download_dataset import download_dataset
 
 
 def lengths_are_ok(

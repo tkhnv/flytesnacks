@@ -1,8 +1,5 @@
 from flytekit import task, StructuredDataset, workflow
 from flytekit.types.directory import FlyteDirectory
-from transformers import AutoTokenizer
-from datasets import Dataset
-import pandas as pd
 
 try:
     from .custom_types import DatasetWithMetadata
@@ -25,6 +22,11 @@ def detokenize(
     dataset_and_languages: DatasetWithMetadata,
     tokenizer_path: FlyteDirectory,
 ) -> DatasetWithMetadata:
+    from torch.utils.data import DataLoader
+    from transformers import AutoTokenizer
+    from datasets import Dataset
+    import pandas as pd
+
     tokenizer_path.download()
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path.path)
     tokenizer.src_lang = dataset_and_languages.source_language
@@ -33,6 +35,9 @@ def detokenize(
     dataset = dataset_and_languages.dataset
     # we expect the dataset to have keys "labels" and "input_ids"
     hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
+
+    print(next(DataLoader(hf_dataset, batch_size=1)))
+
     hf_dataset = hf_dataset.map(
         lambda batch: {"detokenized": tokenizer.batch_decode(batch["translated"], skip_special_tokens=True)},
         batched=True,
