@@ -1,7 +1,8 @@
 import flytekit
 import pandas as pd
 from datasets import Dataset
-from flytekit import task, workflow
+from typing import Dict
+from flytekit import task, workflow, Resources
 from flytekit.types.directory import FlyteDirectory
 from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 
@@ -27,11 +28,12 @@ except ImportError:
     from custom_types import DatasetWithMetadata
 
 
-@task(container_image=transformers_image_spec)
+@task(container_image=transformers_image_spec, limits=Resources(mem="16G"), requests=Resources(mem="15G"))
 def train_model(
     base_model: FlyteDirectory,
     tokenizer: FlyteDirectory,
     tokenized_dataset: DatasetWithMetadata,
+    training_args: Dict[str, int],
 ) -> FlyteDirectory:
     from transformers import AutoModelForSeq2SeqLM, Trainer, TrainingArguments
 
@@ -51,8 +53,8 @@ def train_model(
         output_dir="my-model",
         learning_rate=2e-5,
         per_device_train_batch_size=16,
-        num_train_epochs=2,
         weight_decay=0.01,
+        **training_args,
     )
 
     trainer = Trainer(
@@ -73,9 +75,10 @@ def train_model(
 def wf() -> FlyteDirectory:
     model_name = "facebook/m2m100_418M"
     tokenizer = get_tokenizer(model_name)
-    tokenized_dataset = tokenize(download_dataset("wmt14", "cs-en", {"split": "test"}), tokenizer)
+    dataset = download_dataset("wmt14", "cs-en", {"split": "test"})
+    tokenized_dataset = tokenize(dataset, tokenizer)
     base_model = get_model(model_name)
-    trained_model = train_model(base_model, tokenizer, tokenized_dataset)
+    trained_model = train_model(base_model, tokenizer, tokenized_dataset, {"max_steps": 2})
     return trained_model
 
 
