@@ -54,10 +54,6 @@ def translate(
     from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained("facebook/m2m100_418M")
-    tokenizer.src_lang = dataset.source_language
-    tokenizer.tgt_lang = dataset.target_language
-    # Get the token id of "__{dataset.target_language}__"
-    target_token_id = tokenizer(f"__{dataset.target_language}__", return_tensors="pt")["input_ids"][0, 0]
     # TODO fix batching - we need to pad somehow
     # for batch in DataLoader(hf_dataset, batch_size=batch_size):
     for batch in DataLoader(hf_dataset, batch_size=1):
@@ -66,7 +62,7 @@ def translate(
             attention_mask=torch.LongTensor(batch["attention_mask"]).unsqueeze(0),
             max_length=max_target_length,
             num_beams=beam_size,
-            decoder_start_token_id=target_token_id,
+            forced_bos_token_id=tokenizer.lang_code_to_id[dataset.target_language],
         )
         translated_dataset.append(translated[0, :].tolist())
 
