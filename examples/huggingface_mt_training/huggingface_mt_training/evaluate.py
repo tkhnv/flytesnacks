@@ -1,7 +1,11 @@
 from flytekit import task
 
-from .image_specs import transformers_image_spec
-from .custom_types import DatasetWithMetadata, Metric, EvaluateReturnType
+try:
+    from .image_specs import transformers_image_spec
+    from .custom_types import DatasetWithMetadata, Metric, EvaluateReturnType
+except ImportError:
+    from image_specs import transformers_image_spec
+    from custom_types import DatasetWithMetadata, Metric, EvaluateReturnType
 
 
 metric_name_to_score_map: dict[Metric, str] = {
