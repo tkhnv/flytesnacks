@@ -4,16 +4,17 @@ from flytekit.types.structured.structured_dataset import StructuredDataset
 
 try:
     from .custom_types import DatasetWithMetadata
-    from .image_specs import transformers_image_spec
     from .download_dataset import download_dataset
     from .get_model import get_model, get_tokenizer
+    from .image_specs import transformers_image_spec
     from .tokenize import tokenize
 except ImportError:
+    from tokenize import tokenize
+
     from custom_types import DatasetWithMetadata
-    from image_specs import transformers_image_spec
     from download_dataset import download_dataset
     from get_model import get_model, get_tokenizer
-    from tokenize import tokenize
+    from image_specs import transformers_image_spec
 
 
 # translate a tokenized dataset with M2M100 model
@@ -37,35 +38,31 @@ def translate(
         Dataset: The translated dataset.
     """
     import pandas as pd
+    import torch
     from datasets import Dataset
-    from transformers import AutoModelForSeq2SeqLM
     from torch.utils.data import DataLoader
+    from transformers import AutoModelForSeq2SeqLM
 
     model_path.download()
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
     hf_dataset = Dataset.from_pandas(dataset.dataset.open(pd.DataFrame).all())
     hf_dataset.set_format(type="torch", columns=["input_ids"], output_all_columns=True)
-
     translated_dataset = []
 
     # TODO fix batching - we need to pad somehow
     # for batch in DataLoader(hf_dataset, batch_size=batch_size):
     for batch in DataLoader(hf_dataset, batch_size=1):
-        print(batch)
         translated = model.generate(
             input_ids=batch["input_ids"],
-            attention_mask=batch["attention_mask"],
+            attention_mask=torch.LongTensor(batch["attention_mask"]).unsqueeze(0),
             max_length=max_target_length,
             num_beams=beam_size,
             decoder_start_token_id=model.config.pad_token_id,
         )
+        translated_dataset.append(translated[0, :].tolist())
 
-        translated_dataset.append(translated)
-
-    print(translated_dataset)
-
-    hf_dataset.add_column("translated", translated_dataset)
+    hf_dataset = hf_dataset.add_column("translated", translated_dataset)
     return DatasetWithMetadata(
         StructuredDataset(dataframe=hf_dataset.to_pandas()), dataset.source_language, dataset.target_language
     )
