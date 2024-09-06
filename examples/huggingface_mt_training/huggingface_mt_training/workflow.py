@@ -33,7 +33,8 @@ def translate_and_evaluate(
 ) -> EvaluateReturnType:
     tokenized = tokenize(dataset, tokenizer)
     translated = translate(tokenized, model)
-    score = evaluate(translated, Metric.bleu, {"trust_remote_code": True})
+    detokenized = detokenize(translated, tokenizer)
+    score = evaluate(detokenized, Metric.bleu, {"trust_remote_code": True})
     return score
 
 
