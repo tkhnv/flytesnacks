@@ -70,6 +70,6 @@ def dummy_compare_systems() -> None:
 
 
 @workflow
-def wf() -> None:
+def dummy_wf() -> None:
     """Declare workflow called `wf`."""
     return dummy_compare_systems()
