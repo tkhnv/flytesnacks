@@ -6,6 +6,7 @@ try:
     from .custom_types import EvaluateReturnType
     from .image_specs import plot_image_spec
 except ImportError:
+    from custom_types import EvaluateReturnType
     from image_specs import plot_image_spec
 
 
