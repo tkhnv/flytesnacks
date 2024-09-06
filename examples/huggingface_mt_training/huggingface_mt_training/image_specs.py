@@ -9,8 +9,15 @@ transformers_image_spec = ImageSpec(
         "datasets",
         "flytekitplugins-huggingface",
         "sentencepiece",
-        "pandas",
         "accelerate",
+        "plotly",
+    ],
+    registry="localhost:30000",
+)
+
+plot_image_spec = ImageSpec(
+    packages=[
+        "pandas",
         "plotly",
     ],
     registry="localhost:30000",

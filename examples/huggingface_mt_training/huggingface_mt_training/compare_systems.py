@@ -1,19 +1,18 @@
 import flytekit
 from flytekit import Resources, task, workflow
 import flytekit.deck
-from flytekit.types.directory import FlyteDirectory
 
 try:
     from .custom_types import EvaluateReturnType
-    from .image_specs import transformers_image_spec
+    from .image_specs import plot_image_spec
 except ImportError:
-    from image_specs import transformers_image_spec
+    from image_specs import plot_image_spec
 
 
 @task(
-    container_image=transformers_image_spec,
-    limits=Resources(mem="5G"),
-    requests=Resources(mem="4.5G"),
+    container_image=plot_image_spec,
+    limits=Resources(mem="2G"),
+    requests=Resources(mem="1.5G"),
     enable_deck=True,
 )
 def compare_systems(evaluation_a: EvaluateReturnType, evaluation_b: EvaluateReturnType) -> None:
@@ -41,9 +40,9 @@ def compare_systems(evaluation_a: EvaluateReturnType, evaluation_b: EvaluateRetu
 
 
 @task(
-    container_image=transformers_image_spec,
-    limits=Resources(mem="5G"),
-    requests=Resources(mem="4.5G"),
+    container_image=plot_image_spec,
+    limits=Resources(mem="2G"),
+    requests=Resources(mem="1.5G"),
     enable_deck=True,
 )
 def dummy_compare_systems() -> None:
