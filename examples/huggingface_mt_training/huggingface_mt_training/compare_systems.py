@@ -35,7 +35,7 @@ def compare_systems(evaluation_a: EvaluateReturnType, evaluation_b: EvaluateRetu
         template="plotly_white",
     )
 
-    deck = flytekit.Deck("pca", flytekit.deck.MarkdownRenderer().to_html("### MT Score Comparison"))
+    deck = flytekit.Deck("system-comparison", flytekit.deck.MarkdownRenderer().to_html("### MT Score Comparison"))
     deck.append(to_html(fig))
 
 
@@ -65,7 +65,7 @@ def dummy_compare_systems() -> None:
         template="plotly_white",
     )
 
-    deck = flytekit.Deck("pca", flytekit.deck.MarkdownRenderer().to_html("### MT Score Comparison"))
+    deck = flytekit.Deck("system-comparison", flytekit.deck.MarkdownRenderer().to_html("### MT Score Comparison"))
     deck.append(to_html(fig))
 
 
