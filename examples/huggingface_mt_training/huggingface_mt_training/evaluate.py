@@ -21,7 +21,8 @@ def evaluate(
     metric = load_metric(metric_name_to_score_map[metric_name], **load_metric_kwargs)
     structured_dataset = dataset.dataset
     hf_dataset = Dataset.from_pandas(structured_dataset.open(pd.DataFrame).all())
-    score = metric.compute(predictions=hf_dataset["detokenized"], references=hf_dataset["target"])[
+    # TODO: this doesn't crash, but the score is 0. Find out what exactly we need to pass as input to the metric
+    score = metric.compute(predictions=[[h] for h in hf_dataset["detokenized"]], references=[[[r]] for r in hf_dataset["target"]])[
         metric_name_to_score_map[metric_name]
     ]
     return EvaluateReturnType(score=score)
