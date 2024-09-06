@@ -1,10 +1,11 @@
 import pandas as pd
 from flytekit import workflow
+from flytekit.types.directory import FlyteDirectory
 from datasets import Dataset
 
 try:
     from compare_systems import compare_systems
-    from custom_types import DatasetWithMetadata, Metric
+    from custom_types import DatasetWithMetadata, Metric, EvaluateReturnType
     from download_dataset import download_dataset
     from filter_length_ratio import filter_length_ratio
     from get_model import get_model, get_tokenizer
@@ -15,7 +16,7 @@ try:
     from train import train_model
 except ImportError:
     from .compare_systems import compare_systems
-    from .custom_types import DatasetWithMetadata, Metric
+    from .custom_types import DatasetWithMetadata, Metric, EvaluateReturnType
     from .download_dataset import download_dataset
     from .filter_length_ratio import filter_length_ratio
     from .get_model import get_model, get_tokenizer
@@ -24,6 +25,16 @@ except ImportError:
     from .detokenize import detokenize
     from .evaluate import evaluate
     from .train import train_model
+
+
+@workflow
+def translate_and_evaluate(
+    dataset: DatasetWithMetadata, model: FlyteDirectory, tokenizer: FlyteDirectory
+) -> EvaluateReturnType:
+    tokenized = tokenize(dataset, tokenizer)
+    translated = translate(tokenized, model)
+    score = evaluate(translated, Metric.bleu, {"trust_remote_code": True})
+    return score
 
 
 @workflow
@@ -38,13 +49,8 @@ def wf() -> DatasetWithMetadata:
     filtered_dataset = filter_length_ratio(train_dataset)
     tokenized_train_dataset = tokenize(filtered_dataset, tokenizer)
     trained_model = train_model(model, tokenizer, tokenized_train_dataset, {"max_steps": 2})
-    tokenized_test_dataset = tokenize(test_dataset, tokenizer)
-    translated_dataset_base = translate(tokenized_test_dataset, model)
-    detokenized_dataset_base = detokenize(translated_dataset_base, tokenizer)
-    score_base = evaluate(detokenized_dataset_base, Metric.bleu, {"trust_remote_code": True})
-    translated_dataset_trained = translate(tokenized_test_dataset, trained_model)
-    detokenized_dataset_trained = detokenize(translated_dataset_trained, tokenizer)
-    score_trained = evaluate(detokenized_dataset_trained, Metric.bleu, {"trust_remote_code": True})
+    score_base = translate_and_evaluate(test_dataset, model, tokenizer)
+    score_trained = translate_and_evaluate(test_dataset, trained_model, tokenizer)
     _ = compare_systems(score_base, score_trained)  # currently nothing is returned
     return score_trained
 
