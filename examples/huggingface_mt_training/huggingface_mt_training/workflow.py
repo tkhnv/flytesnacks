@@ -29,10 +29,9 @@ except ImportError:
 
 @workflow
 def translate_and_evaluate(
-    dataset: DatasetWithMetadata, model: FlyteDirectory, tokenizer: FlyteDirectory
+    tokenized_dataset: DatasetWithMetadata, model: FlyteDirectory, tokenizer: FlyteDirectory
 ) -> EvaluateReturnType:
-    tokenized = tokenize(dataset, tokenizer)
-    translated = translate(tokenized, model)
+    translated = translate(tokenized_dataset, model)
     detokenized = detokenize(translated, tokenizer)
     score = evaluate(detokenized, Metric.bleu, {"trust_remote_code": True})
     return score
@@ -49,9 +48,10 @@ def wf() -> DatasetWithMetadata:
     train_dataset = download_dataset("wmt14", "cs-en", {"split": "train"})
     filtered_dataset = filter_length_ratio(train_dataset)
     tokenized_train_dataset = tokenize(filtered_dataset, tokenizer)
+    tokenized_test_dataset = tokenize(test_dataset, tokenizer)
     trained_model = train_model(model, tokenizer, tokenized_train_dataset, {"max_steps": 2})
-    score_base = translate_and_evaluate(test_dataset, model, tokenizer)
-    score_trained = translate_and_evaluate(test_dataset, trained_model, tokenizer)
+    score_base = translate_and_evaluate(tokenized_test_dataset, model, tokenizer)
+    score_trained = translate_and_evaluate(tokenized_test_dataset, trained_model, tokenizer)
     _ = compare_systems(score_base, score_trained)  # currently nothing is returned
     return score_trained
 
