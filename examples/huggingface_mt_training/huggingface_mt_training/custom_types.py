@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal
+from enum import Enum
 
 from flytekit.types.structured.structured_dataset import StructuredDataset
 from mashumaro.mixins.json import DataClassJSONMixin
@@ -15,4 +15,6 @@ class DatasetWithMetadata(DataClassJSONMixin):
 class EvaluateReturnType:
     score: float
 
-Metric = Literal["bleu", "chrf"]
+class Metric(Enum):
+    bleu = "bleu"
+    chrf = "chrf"
