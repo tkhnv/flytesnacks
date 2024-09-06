@@ -12,15 +12,16 @@ metric_name_to_score_map: dict[Metric, str] = {
 @task
 def evaluate(
     dataset: DatasetWithMetadata,
-    metric: Metric,
+    metric_name: Metric,
     load_metric_kwargs: dict = {},
 ) -> EvaluateReturnType:
     from datasets import load_metric, Dataset
     import pandas as pd
 
-    metric = load_metric(metric, **load_metric_kwargs)
-    hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
+    metric = load_metric(metric_name, **load_metric_kwargs)
+    structured_dataset = dataset.dataset
+    hf_dataset = Dataset.from_pandas(structured_dataset.open(pd.DataFrame).all())
     score = metric.compute(predictions=hf_dataset["detokenized"], references=hf_dataset["target"])[
-        metric_name_to_score_map[metric]
+        metric_name_to_score_map[metric_name]
     ]
     return EvaluateReturnType(score=score)
