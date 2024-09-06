@@ -36,7 +36,7 @@ def wf() -> DatasetWithMetadata:
     # add detokenized translation column to the original dataset
     # TODO: maybe we should do this some other way
     original_hf_dataset = Dataset.from_pandas(dataset.open(pd.DataFrame).all())
-    translated_hf_dataset = detokenize(translated_dataset, tokenizer)
+    translated_hf_dataset = Dataset.from_pandas(translated_dataset.open(pd.DataFrame).all())
     original_hf_dataset = original_hf_dataset.add_column("detokenized", translated_hf_dataset["detokenized"])
     score = evaluate(
         DatasetWithMetadata(
