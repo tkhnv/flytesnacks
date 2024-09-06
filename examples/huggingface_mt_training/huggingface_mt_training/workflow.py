@@ -3,6 +3,7 @@ from flytekit import workflow
 from datasets import Dataset
 
 try:
+    from compare_systems import compare_systems
     from custom_types import DatasetWithMetadata, Metric
     from download_dataset import download_dataset
     from filter_length_ratio import filter_length_ratio
@@ -13,6 +14,7 @@ try:
     from evaluate import evaluate
     from train import train_model
 except ImportError:
+    from .compare_systems import compare_systems
     from .custom_types import DatasetWithMetadata, Metric
     from .download_dataset import download_dataset
     from .filter_length_ratio import filter_length_ratio
@@ -43,6 +45,7 @@ def wf() -> DatasetWithMetadata:
     translated_dataset_trained = translate(tokenized_test_dataset, trained_model)
     detokenized_dataset_trained = detokenize(translated_dataset_trained, tokenizer)
     score_trained = evaluate(detokenized_dataset_trained, Metric.bleu, {"trust_remote_code": True})
+    _ = compare_systems(score_base, score_trained)  # currently nothing is returned
     return score_trained
 
 
