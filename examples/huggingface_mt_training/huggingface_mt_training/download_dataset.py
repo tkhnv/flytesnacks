@@ -13,7 +13,7 @@ except ImportError:
 def download_dataset(
     dataset_path: str,
     config_name: str,
-    load_dataset_kwargs: dict,
+    load_dataset_kwargs: dict = {},
 ) -> DatasetWithMetadata:
     from datasets import load_dataset
 
