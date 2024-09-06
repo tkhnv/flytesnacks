@@ -10,7 +10,7 @@ transformers_image_spec = ImageSpec(
         "flytekitplugins-huggingface",
         "sentencepiece",
         "accelerate",
-        "plotly",
+        "sacrebleu",
     ],
     registry="localhost:30000",
 )
