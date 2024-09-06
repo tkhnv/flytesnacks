@@ -9,12 +9,11 @@ try:
     from .image_specs import transformers_image_spec
     from .tokenize_step import tokenize
 except ImportError:
-    from tokenize import tokenize
-
     from custom_types import DatasetWithMetadata
     from download_dataset import download_dataset
     from get_model import get_model, get_tokenizer
     from image_specs import transformers_image_spec
+    from tokenize_step import tokenize
 
 
 # translate a tokenized dataset with M2M100 model

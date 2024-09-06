@@ -9,7 +9,7 @@ try:
     from download_dataset import download_dataset
     from filter_length_ratio import filter_length_ratio
     from get_model import get_model, get_tokenizer
-    from tokenize import tokenize
+    from tokenize_step import tokenize
     from translate import translate
     from detokenize import detokenize
     from evaluate import evaluate
