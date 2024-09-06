@@ -54,13 +54,16 @@ def translate(
     for batch in DataLoader(hf_dataset, batch_size=1):
         print(batch)
         translated = model.generate(
-            batch["input_ids"],
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
             max_length=max_target_length,
             num_beams=beam_size,
             decoder_start_token_id=model.config.pad_token_id,
         )
 
         translated_dataset.append(translated)
+
+    print(translated_dataset)
 
     hf_dataset.add_column("translated", translated_dataset)
     return DatasetWithMetadata(
