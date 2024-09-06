@@ -20,7 +20,7 @@ except ImportError:
     from .download_dataset import download_dataset
     from .filter_length_ratio import filter_length_ratio
     from .get_model import get_model, get_tokenizer
-    from .tokenize import tokenize
+    from .tokenize_step import tokenize
     from .translate import translate
     from .detokenize import detokenize
     from .evaluate import evaluate
@@ -34,6 +34,7 @@ def translate_and_evaluate(
     translated = translate(tokenized_dataset, model)
     detokenized = detokenize(translated, tokenizer)
     score = evaluate(detokenized, Metric.bleu, {"trust_remote_code": True})
+    Metric.chrf
     return score
 
 

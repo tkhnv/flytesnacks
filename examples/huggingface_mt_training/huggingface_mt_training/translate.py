@@ -7,7 +7,7 @@ try:
     from .download_dataset import download_dataset
     from .get_model import get_model, get_tokenizer
     from .image_specs import transformers_image_spec
-    from .tokenize import tokenize
+    from .tokenize_step import tokenize
 except ImportError:
     from tokenize import tokenize
 

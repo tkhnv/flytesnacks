@@ -6,7 +6,7 @@ try:
     from .image_specs import transformers_image_spec
     from .download_dataset import download_dataset
     from .get_model import get_model, get_tokenizer
-    from .tokenize import tokenize
+    from .tokenize_step import tokenize
     from .translate import translate
 except ImportError:
     from custom_types import DatasetWithMetadata
